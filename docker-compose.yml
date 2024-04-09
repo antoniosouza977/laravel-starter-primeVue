@@ -1,0 +1,43 @@
+version: "3.7"
+
+networks:
+  proxy:
+    external: true
+  app:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www
+    networks:
+      - app
+      - proxy
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - app
+
+  node:
+    build:
+        context: .
+        dockerfile: docker/node/Dockerfile
+    restart: unless-stopped
+    ports:
+        - "5173:5173"
+    volumes:
+        - ./:/var/www
+    networks:
+        - app
+
